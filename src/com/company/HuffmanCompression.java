@@ -1,6 +1,10 @@
 package com.company;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Comparator;
 import java.util.List;
 
@@ -64,25 +68,30 @@ public class HuffmanCompression extends SimpleCompression{
     }
 
     @Override
-    public void compress(String filename){
-        String[] opt = getClass().getName().split("\\.");
-        String text = loadString(filename, opt[opt.length-1]).toLowerCase();
-        System.out.println(text.substring(0,20));
+    public String load(String filename){
+        byte[] data = null;
+        try {
+            data = Files.readAllBytes(Paths.get(".\\res\\" + filename));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        BitSet bset = fromByteArray(data);
+        text = "";
 
-        System.out.println("Creating...");
-        create();
+        StringBuilder bText = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
 
-        System.out.println("Encoding...");
-        encode();
+        for(int i=0; i<bset.length();i++){
+            Symbol s = _symbols_code.get(sb.toString());
 
-        System.out.println("Decoding...");
+            if(s!=null){
+                bText.append(s.getName());
+                sb = new StringBuilder();
+            }
+            sb.append(bset.get(i)?1:0);
+        }
+        text = bText.toString();
 
-        System.out.println("Saving...");
-        save();
-
-        System.out.println("Loading...");
-        //text = load(outputName);
-        //System.out.println(text.substring(0,20));
-        System.out.println("Efektywność : " + getEfficiency());
+        return text;
     }
 }
